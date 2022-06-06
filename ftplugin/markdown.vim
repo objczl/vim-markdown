@@ -651,7 +651,7 @@ function! s:Markdown_GetUrlForPosition(lnum, col)
             let l:col += 1
         elseif l:char ==# '>' || l:char ==# ')'
             let l:col -= 1
-        elseif l:char ==# '[' || l:char ==# ']' || l:char ==# '('
+        elseif l:char ==# '[[' || l:char ==# ']]' || l:char ==# '('
             let [l:lnum, l:col] = <sid>FindNextSyntax(l:lnum, l:col, 'mkdURL')
         else
             return ''
