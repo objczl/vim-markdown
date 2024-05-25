@@ -209,7 +209,7 @@ HtmlHiLink mkdTodoProject      Special
 HtmlHiLink mkdTodoDate         Comment
 HtmlHiLink mkdTodoDue          htmlTagName
 HtmlHiLink mkdTodoDone         Comment
-HtmlHiLink mkdBookPage         htmlUnderline
+HtmlHiLink mkdBookPage         htmlUnderlineBold
 HtmlHiLink mkdInlineID         htmlUnderline
 HtmlHiLink mkdInlineImage      htmlUnderline
 HtmlHiLink mkdLiquidDelimiter  Special
