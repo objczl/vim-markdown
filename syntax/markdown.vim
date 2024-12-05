@@ -63,7 +63,9 @@ execute 'syn region htmlBoldItalic matchgroup=mkdBoldItalic start="\%(^\|\s\)\zs
 
 syn match mkdBookPage "\<p\.[0-9]\+\>"
 syn match mkdInlineImage /<[^>]*\.\(png\|jpe?g\)>/ contained
-syn region mkdInlineImage matchgroup=mkdDelimiter start=+<+     end=+>+  contained
+syn region mkdInlineImage matchgroup=mkdImageDelimiter start=+<+ end=+>+
+hi mkdImageDelimiter ctermfg=gray guifg=gray
+hi imageUnderline    ctermfg=gray guifg=gray cterm=underline
 
 " [link](URL) | [link][id] | [link][] | ![image](URL)
 syn region mkdFootnotes matchgroup=mkdDelimiter start="\[^"    end="\]"
@@ -177,6 +179,7 @@ syn cluster mkdHeadingContent contains=htmlItalic,htmlBold,htmlBoldItalic,mkdFoo
 syn cluster mkdNonListItem contains=@htmlTop,htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdInlineURL,mkdLink,mkdLinkDef,mkdLineBreak,mkdBlockquote,mkdCode,mkdRule,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,mkdMath,mkdStrike
 syn cluster mkdNonListItem contains=@htmlTop,htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdInlineURL,mkdLink,mkdLinkDef,mkdLineBreak,mkdBlockquote,mkdCode,mkdRule,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,mkdMath,mkdStrike,mkdBookPage,mkdInlineID,mkdInlineImage,mkdTodoContext,mkdTodoProject,mkdTodoDone,mkdTodoDate,mkdTodoDue
 
+
 "highlighting for Markdown groups
 HtmlHiLink mkdString           String
 HtmlHiLink mkdCode             String
@@ -211,7 +214,7 @@ HtmlHiLink mkdTodoDue          htmlTagName
 HtmlHiLink mkdTodoDone         Comment
 HtmlHiLink mkdBookPage         htmlUnderlineBold
 HtmlHiLink mkdInlineID         htmlUnderline
-HtmlHiLink mkdInlineImage      htmlUnderline
+HtmlHiLink mkdInlineImage      imageUnderline
 HtmlHiLink mkdLiquidDelimiter  Special
 
 let b:current_syntax = 'mkd'
