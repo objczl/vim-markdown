@@ -64,8 +64,8 @@ execute 'syn region htmlBoldItalic matchgroup=mkdBoldItalic start="\%(^\|\s\)\zs
 syn match mkdBookPage "\<p\.[0-9]\+\>"
 syn match mkdInlineImage /<[^>]*\.\(png\|jpe?g\)>/ contained
 syn region mkdInlineImage matchgroup=mkdImageDelimiter start=+<+ end=+>+
-hi mkdImageDelimiter ctermfg=gray guifg=gray
-hi imageUnderline    ctermfg=gray guifg=gray cterm=underline
+hi mkdImageDelimiter ctermfg=246 guifg=#949494
+hi imageUnderline    ctermfg=246 guifg=#949494 cterm=underline
 
 " [link](URL) | [link][id] | [link][] | ![image](URL)
 syn region mkdFootnotes matchgroup=mkdDelimiter start="\[^"    end="\]"
@@ -83,7 +83,7 @@ syn region  mkdInlineURL matchgroup=mkdDelimiter start="(\(https\?:\/\/\(\w\+\(:
 
 " Autolink with angle brackets.
 syn region mkdInlineURL matchgroup=mkdDelimiter start="\\\@<!<\ze[a-z][a-z0-9,.-]\{1,22}:\/\/[^> ]*>" end=">"
-syn region mkdInlineID  matchgroup=mkdDelimiter start=+\[\[+     end=+\]\]+ contained
+syn region mkdInlineID  matchgroup=mkdImageDelimiter start=+\[\[+     end=+\]\]+ contained
 
 " Link definitions: [id]: URL (Optional Title)
 syn region mkdLinkDef matchgroup=mkdDelimiter   start="^ \{,3}\zs\[\^\@!" end="]:" oneline nextgroup=mkdLinkDefTarget skipwhite
@@ -213,7 +213,7 @@ HtmlHiLink mkdTodoDate         Comment
 HtmlHiLink mkdTodoDue          htmlTagName
 HtmlHiLink mkdTodoDone         Comment
 HtmlHiLink mkdBookPage         htmlUnderlineBold
-HtmlHiLink mkdInlineID         htmlUnderline
+HtmlHiLink mkdInlineID         imageUnderline
 HtmlHiLink mkdInlineImage      imageUnderline
 HtmlHiLink mkdLiquidDelimiter  Special
 
