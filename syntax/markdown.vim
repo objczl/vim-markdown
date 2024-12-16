@@ -82,7 +82,7 @@ syn match   mkdInlineURL /https\?:\/\/\(\w\+\(:\w\+\)\?@\)\?\([A-Za-z0-9][-_0-9A
 syn region  mkdInlineURL matchgroup=mkdDelimiter start="(\(https\?:\/\/\(\w\+\(:\w\+\)\?@\)\?\([A-Za-z0-9][-_0-9A-Za-z]*\.\)\{1,}\(\w\{2,}\.\?\)\{1,}\(:[0-9]\{1,5}\)\?[^] \t]*)\)\@=" end=")"
 
 " Autolink with angle brackets.
-syn region mkdInlineURL matchgroup=mkdDelimiter start="\\\@<!<\ze[a-z][a-z0-9,.-]\{1,22}:\/\/[^> ]*>" end=">"
+syn region mkdInlineURL matchgroup=mkdImageDelimiter start="\\\@<!<\ze[a-z][a-z0-9,.-]\{1,22}:\/\/[^> ]*>" end=">"
 syn region mkdInlineID  matchgroup=mkdImageDelimiter start=+\[\[+     end=+\]\]+ contained
 
 " Link definitions: [id]: URL (Optional Title)
@@ -195,7 +195,7 @@ HtmlHiLink mkdLineBreak        Visual
 HtmlHiLink mkdFootnotes        htmlLink
 HtmlHiLink mkdLink             htmlLink
 HtmlHiLink mkdURL              htmlString
-HtmlHiLink mkdInlineURL        htmlLink
+HtmlHiLink mkdInlineURL        imageUnderline
 HtmlHiLink mkdID               Identifier
 HtmlHiLink mkdLinkDef          mkdID
 HtmlHiLink mkdLinkDefTarget    mkdURL
