@@ -59,6 +59,12 @@ execute 'syntax region htmlBold matchgroup=mkdBold start="\%(^\|\s\)\zs__\ze\S" 
 execute 'syntax region htmlBoldItalic matchgroup=mkdBoldItalic start="\%(^\|\s\)\zs\*\*\*\ze\S" end="\S\zs\*\*\*" keepend contains=@Spell' . s:oneline . s:concealends
 execute 'syntax region htmlBoldItalic matchgroup=mkdBoldItalic start="\%(^\|\s\)\zs___\ze\S" end="\S\zs___" keepend contains=@Spell' . s:oneline . s:concealends
 
+syntax match mkdBookPage "\<p\.[0-9]\+\>"
+syntax match mkdInlineImage /<[^>]*\.\(png\|jpe?g\)>/ contained
+syntax region mkdInlineImage matchgroup=mkdImageDelimiter start=+<+ end=+>+
+highlight mkdImageDelimiter ctermfg=246 guifg=#949494
+highlight imageUnderline ctermfg=246 guifg=#949494 cterm=underline
+
 " [link](URL) | [link][id] | [link][] | ![image](URL)
 syntax region mkdFootnotes matchgroup=mkdDelimiter start="\[^"    end="\]"
 execute 'syntax region mkdID matchgroup=mkdDelimiter    start="\["    end="\]" contained oneline' . s:conceal
@@ -74,7 +80,8 @@ syntax match   mkdInlineURL /https\?:\/\/\(\w\+\(:\w\+\)\?@\)\?\([A-Za-z0-9][-_0
 syntax region  mkdInlineURL matchgroup=mkdDelimiter start="(\(https\?:\/\/\(\w\+\(:\w\+\)\?@\)\?\([A-Za-z0-9][-_0-9A-Za-z]*\.\)\{1,}\(\w\{2,}\.\?\)\{1,}\(:[0-9]\{1,5}\)\?[^] \t]*)\)\@=" end=")"
 
 " Autolink with angle brackets.
-syntax region mkdInlineURL matchgroup=mkdDelimiter start="\\\@<!<\ze[a-z][a-z0-9,.-]\{1,22}:\/\/[^> ]*>" end=">"
+syntax region mkdInlineURL matchgroup=mkdImageDelimiter start="\\\@<!<\ze[a-z][a-z0-9,.-]\{1,22}:\/\/[^> ]*>" end=">"
+syntax region mkdInlineID matchgroup=mkdImageDelimiter start=+\[\[+ end=+\]\]+
 
 " Link definitions: [id]: URL (Optional Title)
 syntax region mkdLinkDef matchgroup=mkdDelimiter   start="^ \{,3}\zs\[\^\@!" end="]:" oneline nextgroup=mkdLinkDefTarget skipwhite
@@ -93,9 +100,24 @@ syntax region htmlH6       matchgroup=mkdHeading     start="^\s*######"         
 syntax match  htmlH1       /^.\+\n=\+$/ contains=@mkdHeadingContent,@Spell
 syntax match  htmlH2       /^.\+\n-\+$/ contains=@mkdHeadingContent,@Spell
 
+syntax match  mkdTodoAction       /^\s*\%([-?]\|\d\+\.\)\ze\s\+/ contained
+syntax region mkdTodoActionLine   start="^\s*\%([-?]\|\d\+\.\)\s\+" end="$" oneline contains=@mkdNonListItem,mkdTodoAction,@Spell
+syntax match  mkdTodoQuestion     /^\s*\%([\??]\|\d\+\.\)\ze\s\+/ contained
+syntax region mkdTodoQuestionLine start="^\s*\%([\??]\|\d\+\.\)\s\+" end="$" oneline contains=@mkdNonListItem,mkdTodoQuestion,@Spell
+syntax match  mkdTodoWait         /^\s*\%([<?]\|\d\+\.\)\ze\s\+/ contained
+syntax region mkdTodoWaitLine     start="^\s*\%([<]\|\d\+\.\)\s\+" end="$" oneline contains=@mkdNonListItem,mkdTodoWait,mkdTodoContext,mkdTodoProject,mkdTodoDate,mkdTodoDue,@Spell
+syntax region mkdTodoDone         start=/^\s*[x]\s.\+/ end=/$/ contains=mkdLineBreak
+syntax match  mkdTodoDate         '\s\d\{2,4\}-\d\{2\}-\d\{2\}' contains=NONE
+syntax match  mkdTodoDue          'due:\d\{2,4\}-\d\{2\}-\d\{2\}' contains=NONE
+syntax match  mkdTodoContext      /\s\zs[@][^ \t(]\+\(([^)]*)\)\?/
+syntax match  mkdTodoProject      /\s\zs[\+][^ \t(]\+\(([^)]*)\)\?/
+syntax match  mkdTimeLine         /^\s*\%(\d\{1,2}:\d\{2}\s\+[AP]M\)\ze.*/ containedin=ALL
+syntax match  mkdDate             /^\s*\%(\d\{1,2}\/\d\{1,2}\/\d\{2}\)\ze.*/ containedin=ALL
+syntax match  mkdTag              /\(^\|\s\)#[-A-Za-z0-9_]\+/ containedin=ALLBUT,mkdCode,mkdTodoDone
+
 "define Markdown groups
 syntax match  mkdLineBreak    /  \+$/
-syntax region mkdBlockquote   start=/^\s*>/                   end=/$/ contains=mkdLink,mkdInlineURL,mkdLineBreak,@Spell
+syntax region mkdBlockquote   start=/^\s*>/ end=/$/ contains=mkdLink,mkdInlineURL,mkdLineBreak,mkdTodoContext,mkdTodoProject,mkdInlineID,mkdInlineImage,@Spell
 execute 'syntax region mkdCode matchgroup=mkdCodeDelimiter start=/\(\([^\\]\|^\)\\\)\@<!`/                     end=/`/'  . s:concealcode
 execute 'syntax region mkdCode matchgroup=mkdCodeDelimiter start=/\(\([^\\]\|^\)\\\)\@<!``/ skip=/[^`]`[^`]/   end=/``/' . s:concealcode
 execute 'syntax region mkdCode matchgroup=mkdCodeDelimiter start=/^\s*\z(`\{3,}\)[^`]*$/                       end=/^\s*\z1`*\s*$/'            . s:concealcode
@@ -107,10 +129,10 @@ syntax region mkdFootnote     start="\[^"                     end="\]"
 syntax match  mkdCode         /^\s*\n\(\(\s\{8,}[^ ]\|\t\t\+[^\t]\).*\n\)\+/
 syntax match  mkdCode         /\%^\(\(\s\{4,}[^ ]\|\t\+[^\t]\).*\n\)\+/
 syntax match  mkdCode         /^\s*\n\(\(\s\{4,}[^ ]\|\t\+[^\t]\).*\n\)\+/ contained
-syntax match  mkdListItem     /^\s*\%([-*+]\|\d\+\.\)\ze\s\+/ contained nextgroup=mkdListItemCheckbox
+syntax match  mkdListItem     /^\s*\%([*+]\|\d\+\.\)\ze\s\+/ contained nextgroup=mkdListItemCheckbox
 syntax match  mkdListItemCheckbox     /\[[xXoO ]\]\ze\s\+/ contained contains=mkdListItem
-syntax region mkdListItemLine start="^\s*\%([-*+]\|\d\+\.\)\s\+" end="$" oneline contains=@mkdNonListItem,mkdListItem,mkdListItemCheckbox,@Spell
-syntax region mkdNonListItemBlock start="\(\%^\(\s*\([-*+]\|\d\+\.\)\s\+\)\@!\|\n\(\_^\_$\|\s\{4,}[^ ]\|\t+[^\t]\)\@!\)" end="^\(\s*\([-*+]\|\d\+\.\)\s\+\)\@=" contains=@mkdNonListItem,@Spell
+syntax region mkdListItemLine start="^\s*\%([*+]\|\d\+\.\)\s\+" end="$" oneline contains=@mkdNonListItem,mkdListItem,mkdListItemCheckbox,@Spell
+syntax region mkdNonListItemBlock start="\(\%^\(\s*\([-*+?]\|\d\+\.\)\s\+\)\@!\|\n\(\_^\_$\|\s\{4,}[^ ]\|\t+[^\t]\)\@!\)" end="^\(\s*\([-*+?]\|\d\+\.\)\s\+\)\@=" contains=@mkdNonListItem,@Spell
 syntax match  mkdRule         /^\s*\*\s\{0,1}\*\s\{0,1}\*\(\*\|\s\)*$/
 syntax match  mkdRule         /^\s*-\s\{0,1}-\s\{0,1}-\(-\|\s\)*$/
 syntax match  mkdRule         /^\s*_\s\{0,1}_\s\{0,1}_\(_\|\s\)*$/
@@ -118,7 +140,7 @@ syntax match  mkdRule         /^\s*_\s\{0,1}_\s\{0,1}_\(_\|\s\)*$/
 " YAML frontmatter
 if get(g:, 'vim_markdown_frontmatter', 0)
   syntax include @yamlTop syntax/yaml.vim
-  syntax region Comment matchgroup=mkdDelimiter start="\%^---$" end="^\(---\|\.\.\.\)$" contains=@yamlTop keepend
+  syntax region Comment matchgroup=mkdLiquidDelimiter start="\%^---$" end="^\(---\|\.\.\.\)$" contains=@yamlTop keepend
   unlet! b:current_syntax
 endif
 
@@ -154,8 +176,10 @@ if get(g:, 'vim_markdown_strikethrough', 0)
     HtmlHiLink mkdStrike        htmlStrike
 endif
 
-syntax cluster mkdHeadingContent contains=htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdLink,mkdInlineURL,mkdStrike,mkdCode
-syntax cluster mkdNonListItem contains=@htmlTop,htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdInlineURL,mkdLink,mkdLinkDef,mkdLineBreak,mkdBlockquote,mkdCode,mkdRule,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,mkdMath,mkdStrike
+syntax cluster mkdHeadingContent contains=htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdStrike,mkdLink,mkdInlineURL,mkdInlineID,mkdInlineImage,mkdTodoContext,mkdTodoProject
+syntax cluster mkdNonListItem contains=@htmlTop,htmlItalic,htmlBold,htmlBoldItalic,mkdFootnotes,mkdInlineURL,mkdLink,mkdLinkDef,mkdLineBreak,mkdBlockquote,mkdCode,mkdRule,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,mkdMath,mkdStrike,mkdBookPage,mkdInlineID,mkdInlineImage,mkdTodoContext,mkdTodoProject,mkdTodoDone,mkdTodoDate,mkdTodoDue
+
+highlight mkdQuestionRule ctermfg=203 guifg=#f13134
 
 "highlighting for Markdown groups
 HtmlHiLink mkdString           String
@@ -172,12 +196,30 @@ HtmlHiLink mkdLineBreak        Visual
 HtmlHiLink mkdFootnotes        htmlLink
 HtmlHiLink mkdLink             htmlLink
 HtmlHiLink mkdURL              htmlString
-HtmlHiLink mkdInlineURL        htmlLink
+HtmlHiLink mkdInlineURL        imageUnderline
 HtmlHiLink mkdID               Identifier
 HtmlHiLink mkdLinkDef          mkdID
 HtmlHiLink mkdLinkDefTarget    mkdURL
 HtmlHiLink mkdLinkTitle        htmlString
 HtmlHiLink mkdDelimiter        Delimiter
+HtmlHiLink mkdTodoAction       cssAtRule
+HtmlHiLink mkdTodoActionLine   cssAtRule
+HtmlHiLink mkdTodoQuestion     mkdQuestionRule
+HtmlHiLink mkdTodoQuestionLine mkdQuestionRule
+HtmlHiLink mkdTodoWait         Comment
+HtmlHiLink mkdTodoWaitLine     Comment
+HtmlHiLink mkdTodoContext      Context
+HtmlHiLink mkdTodoProject      Special
+HtmlHiLink mkdTodoDate         Comment
+HtmlHiLink mkdTodoDue          htmlTagName
+HtmlHiLink mkdTodoDone         Comment
+HtmlHiLink mkdBookPage         htmlUnderlineBold
+HtmlHiLink mkdInlineID         imageUnderline
+HtmlHiLink mkdInlineImage      imageUnderline
+HtmlHiLink mkdLiquidDelimiter  Special
+HtmlHiLink mkdDate             htmlUnderline
+HtmlHiLink mkdTimeLine         htmlComment
+HtmlHiLink mkdTag              Special
 
 let b:current_syntax = 'mkd'
 
